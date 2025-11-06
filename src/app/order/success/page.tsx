@@ -1,9 +1,12 @@
 'use client';
 
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
-export default function SuccessPage() {
+export const dynamic = 'force-dynamic';
+
+function SuccessBody() {
     const sp = useSearchParams();
     const method = sp.get('method') === 'cod' ? '代引き' : 'カード';
     
@@ -18,5 +21,13 @@ export default function SuccessPage() {
                 </div>
             </div>
         </main>
+    );
+}
+
+export default function SuccessPage() {
+    return (
+        <Suspense fallback={ <main className="mx-auto max-w-[420px] p-6 text-center">読み込み中...</main> }>
+            <SuccessBody />    
+        </Suspense>
     );
 }
