@@ -50,8 +50,9 @@ export default function OrderPage() {
         if (typeof window === 'undefined') {
             return;
         }
+        const shipTo = localStorage.getItem('shipTo') || '';
         const hist = JSON.parse(localStorage.getItem('orders') ?? '[]');
-        hist.unshift({ ts: Date.now(), items, subtotal, shipping, total });
+        hist.unshift({ ts: Date.now(), pref, shipTo, items, subtotal, shipping, total });
         localStorage.setItem('orders', JSON.stringify(hist.slice(0, 10)));
     }
 
@@ -121,6 +122,9 @@ export default function OrderPage() {
             <div className="grid grid-cols-2 gap-2">
                 <button onClick={checkoutCard} disabled={subtotal === 0} className="bg-black text-white py-3 rounded disabled:opacity-50">カードで支払う</button>
                 <button onClick={chooseCOD} disabled={subtotal === 0} className="border py-3 rounded disabled:opacity-50">代引きを選ぶ</button>
+            </div>
+            <div className="text-center">
+                <a href="/profile" className="text-blue-600 underline text-sm">会員情報を変更する（送り先住所）</a>
             </div>
             <p className="text-xs text-gray-500">※ 住所・支払い方法の変更は会員情報変更ボタンからお願いします</p>
         </main>
