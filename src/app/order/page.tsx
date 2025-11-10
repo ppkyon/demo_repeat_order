@@ -122,7 +122,7 @@ export default function OrderPage() {
                 <button onClick={checkoutCard} disabled={subtotal === 0} className="bg-black text-white py-3 rounded disabled:opacity-50">カードで支払う</button>
                 <button onClick={chooseCOD} disabled={subtotal === 0} className="border py-3 rounded disabled:opacity-50">代引きを選ぶ</button>
             </div>
-            <p className="text-xs text-gray-500">※ 初回は会員情報の登録をお願いします（住所・支払い方法など）</p>
+            <p className="text-xs text-gray-500">※ 住所・支払い方法の変更は会員情報変更ボタンからお願いします</p>
         </main>
     );
 }
