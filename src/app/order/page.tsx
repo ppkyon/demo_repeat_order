@@ -3,18 +3,23 @@
 import { useEffect, useMemo, useState } from 'react';
 import QtyControl from '@/components/QtyControl';
 import { PRODUCTS } from '@/lib/products';
-import { PREFS, getShipping } from '@/lib/shipping';
+import { getShipping } from '@/lib/shipping';
 
 type CartItem = { id: string; name: string; price: number; quantity: number };
 
 export default function OrderPage() {
     const [pref, setPref] = useState('東京都');
     const [qty, setQty] = useState<Record<string, number>>({});
+    const [missingAddress, setMissingAddress] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (typeof window === 'undefined') {
             return;
         }
+
+        setMissingAddress(!localStorage.getItem('shipTo'));
+
         const params = new URLSearchParams(window.location.search);
         if (params.get('reorder') === '1') {
             try {
@@ -37,6 +42,24 @@ export default function OrderPage() {
         }
     }, []);
 
+    useEffect(() => {
+        if (typeof window === 'undefined') {
+            return;
+        }
+        const onFocus = () => setMissingAddress(!localStorage.getItem('shipTo'));
+        const onStorage = (e: StorageEvent) => {
+            if (e.key === 'shipTo') {
+                setMissingAddress(!localStorage.getItem('shipTo'));
+            }
+        };
+        window.addEventListener('focus', onFocus);
+        window.addEventListener('storage', onStorage);
+        return () => {
+            window.removeEventListener('focus', onFocus);
+            window.removeEventListener('storage', onStorage);
+        };
+    }, []);
+
     const items: CartItem[] = useMemo(
         () => PRODUCTS.map(p => ({ ...p, quantity: qty[p.id] ?? 0 })).filter(i => i.quantity > 0),
         [qty]
@@ -57,30 +80,41 @@ export default function OrderPage() {
     }
 
     async function checkoutCard() {
-        if (subtotal === 0) {
+        if (subtotal === 0 || items.length === 0 || loading) {
             return;
         }
-        saveHistory();
-        const res = await fetch('/api/checkout', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                items,
-                shippingFee: shipping,
-                successUrl: window.location.origin + '/order/success',
-                cancelUrl: window.location.href,
-            }),
-        });
-        const data = await res.json();
-        if (data.url) {
-            window.location.href = data.url;
+        try {
+            setLoading(true);
+            saveHistory();
+            const res = await fetch('/api/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    items,
+                    shippingFee: shipping,
+                    successUrl: window.location.origin + '/order/success',
+                    cancelUrl: window.location.href,
+                }),
+            });
+            if (!res.ok) {
+                throw new Error('checkout failed');
+            }
+            const data = await res.json();
+            if (data.url) {
+                window.location.href = data.url;
+            }
+        } catch (e) {
+            alert('決済開始に失敗しました。時間をおいて再度お試しください。');
+        } finally {
+            setLoading(false);
         }
     }
 
     function chooseCOD() {
-        if (subtotal === 0) {
+        if (subtotal === 0 || items.length === 0 || loading) {
             return;
         }
+        setLoading(true);
         saveHistory();
         window.location.href = '/order/success?method=cod';
     }
@@ -99,7 +133,7 @@ export default function OrderPage() {
                     <div key={p.id} className="flex items-center justify-between border rounded p-3">
                         <div>
                             <div className="font-medium">{p.name}</div>
-                            <div className="text-sm text-gray-600">￥{p.price.toLocaleString()}</div>
+                            <div className="text-sm text-gray-600">￥{p.price.toLocaleString('ja-JP')}</div>
                         </div>
                         <QtyControl value={qty[p.id] ?? 0 } onChange={(v) => setQty(s => ({ ...s, [p.id]: v }))} />
                     </div>
@@ -108,20 +142,23 @@ export default function OrderPage() {
             <div className="border rounded p-3 space-y-1">
                 <div className="flex justify-between">
                     <span>小計</span>
-                    <span>￥{subtotal.toLocaleString()}</span>
+                    <span>￥{subtotal.toLocaleString('ja-JP')}</span>
                 </div>
                 <div className="flex justify-between">
                     <span>送料</span>
-                    <span>￥{shipping.toLocaleString()}</span>
+                    <span>￥{shipping.toLocaleString('ja-JP')}</span>
                 </div>
                 <div className="flex justify-between font-bold text-lg">
                     <span>合計</span>
-                    <span>￥{total.toLocaleString()}</span>
+                    <span>￥{total.toLocaleString('ja-JP')}</span>
                 </div>
             </div>
+            {missingAddress && (
+                <p className="text-xs text-red-600">送り先住所が未登録です。登録が完了するまでご購入はできません。ご注文前に <a href="/profile" className="underline">会員情報</a> から登録してください。</p>
+            )}
             <div className="grid grid-cols-2 gap-2">
-                <button onClick={checkoutCard} disabled={subtotal === 0} className="bg-black text-white py-3 rounded disabled:opacity-50">カードで支払う</button>
-                <button onClick={chooseCOD} disabled={subtotal === 0} className="border py-3 rounded disabled:opacity-50">代引きを選ぶ</button>
+                <button onClick={checkoutCard} disabled={subtotal === 0 || loading || missingAddress} className="bg-black text-white py-3 rounded disabled:opacity-50">カードで支払う</button>
+                <button onClick={chooseCOD} disabled={subtotal === 0 || loading || missingAddress} className="border py-3 rounded disabled:opacity-50">代引きを選ぶ</button>
             </div>
             <div className="text-center">
                 <a href="/profile" className="text-blue-600 underline text-sm">会員情報を変更する（送り先住所）</a>
