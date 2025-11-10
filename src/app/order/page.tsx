@@ -87,12 +87,12 @@ export default function OrderPage() {
     return (
         <main className="mx-auto max-w-[420px] p-4 space-y-4">
             <h1 className="text-xl font-bold text-center">ご注文はこちら</h1>
-            <label className="block">
+            {/* <label className="block">
                 お届け先（都道府県）
                 <select className="mt-1 border p-2 rounded w-full" value={pref} onChange={(e) => setPref(e.target.value)}>
                     {PREFS.map(p => <option key={p} value={p}>{p}</option>)}
                 </select>
-            </label>
+            </label> */}
             <div className="space-y-3">
                 {PRODUCTS.map(p => (
                     <div key={p.id} className="flex items-center justify-between border rounded p-3">
