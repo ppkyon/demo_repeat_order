@@ -159,7 +159,7 @@ export default function OrderPage() {
             <div className="grid grid-cols-2 gap-2">
                 {/* <button onClick={checkoutCard} disabled={subtotal === 0 || loading || missingAddress} className="bg-black text-white py-3 rounded disabled:opacity-50">カードで支払う</button>
                 <button onClick={chooseCOD} disabled={subtotal === 0 || loading || missingAddress} className="border py-3 rounded disabled:opacity-50">代引きを選ぶ</button> */}
-                <button onClick={chooseCOD} disabled={subtotal === 0 || loading || missingAddress} className="bg-black text-white py-3 rounded w-full disabled:opacity-50"></button>
+                <button onClick={chooseCOD} disabled={subtotal === 0 || loading || missingAddress} className="bg-black text-white py-3 rounded w-full disabled:opacity-50">購入する</button>
             </div>
             <div className="text-center">
                 <a href="/profile" className="text-blue-600 underline text-sm">会員情報を変更する（送り先住所）</a>
