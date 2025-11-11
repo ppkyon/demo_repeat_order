@@ -157,8 +157,9 @@ export default function OrderPage() {
                 <p className="text-xs text-red-600">送り先住所が未登録です。登録が完了するまでご購入はできません。ご注文前に <a href="/profile" className="underline">会員情報</a> から登録してください。</p>
             )}
             <div className="grid grid-cols-2 gap-2">
-                <button onClick={checkoutCard} disabled={subtotal === 0 || loading || missingAddress} className="bg-black text-white py-3 rounded disabled:opacity-50">カードで支払う</button>
-                <button onClick={chooseCOD} disabled={subtotal === 0 || loading || missingAddress} className="border py-3 rounded disabled:opacity-50">代引きを選ぶ</button>
+                {/* <button onClick={checkoutCard} disabled={subtotal === 0 || loading || missingAddress} className="bg-black text-white py-3 rounded disabled:opacity-50">カードで支払う</button>
+                <button onClick={chooseCOD} disabled={subtotal === 0 || loading || missingAddress} className="border py-3 rounded disabled:opacity-50">代引きを選ぶ</button> */}
+                <button onClick={chooseCOD} disabled={subtotal === 0 || loading || missingAddress} className="bg-black text-white py-3 rounded w-full disabled:opacity-50"></button>
             </div>
             <div className="text-center">
                 <a href="/profile" className="text-blue-600 underline text-sm">会員情報を変更する（送り先住所）</a>
